@@ -1,4 +1,7 @@
 import React, { useMemo, useState, useEffect } from "react";
+import logoImg from "./elementsnl_logo.jpeg";
+import rnImg from "./react-native.png";
+import nativeImg from "./native.png";
 
 // --- Configure your questionnaire here -------------------------------------
 // Each option contributes weights to either RN or Native. Adjust as you wish.
@@ -21,76 +24,240 @@ type Question = {
 };
 
 const QUESTIONS: Question[] = [
+  // Device Features
   {
-    id: "os_features",
-    category: "Platform Requirements",
-    text: "Will the app rely heavily on platform-specific OS features (e.g., NFC, Bluetooth LE, background services, CarPlay/Android Auto, widgets)?",
+    id: "device_features",
+    category: "Device Features",
+    text: "Will your app need deep access to device hardware or platform-only features (GPS, cameras, BLE, background services, widgets)?",
     options: [
-      { label: "Yes, heavily", value: "yes", weights: { rn: 0, native: 3 } },
       {
-        label: "Somewhat",
-        value: "somewhat",
-        weights: { rn: 0.0, native: 1.5 },
+        label: "Yes — extensive access",
+        value: "yes",
+        weights: { rn: 0, native: 3 },
       },
-      { label: "No", value: "no", weights: { rn: 3, native: 0 } },
+      {
+        label: "Some features",
+        value: "some",
+        weights: { rn: 0, native: 1.5 },
+      },
+      { label: "No", value: "no", weights: { rn: 2, native: 0 } },
     ],
   },
+
+  // Performance & UI
   {
-    id: "graphics_perf",
+    id: "performance_needs",
     category: "Performance & UI",
-    text: "Do you need advanced 2D/3D graphics, AR/VR, or game-level performance?",
+    text: "Is high-performance rendering or low-level graphics (game, AR/VR, heavy animations) critical?",
     options: [
-      { label: "Yes", value: "yes", weights: { rn: 0, native: 3 } },
+      { label: "Yes — critical", value: "yes", weights: { rn: 0, native: 3 } },
       {
-        label: "Maybe / unsure",
+        label: "Maybe / some parts",
+        value: "maybe",
+        weights: { rn: 0.5, native: 1.5 },
+      },
+      { label: "No", value: "no", weights: { rn: 1.5, native: 0 } },
+    ],
+  },
+
+  // User Experience
+  {
+    id: "ux_platform_fidelity",
+    category: "User Experience",
+    text: "Do you need an experience that exactly matches native UI components or you prefer a consistent cross-platform experience?",
+    options: [
+      {
+        label: "Yes — exact native UX",
+        value: "yes",
+        weights: { rn: 0, native: 1.5 },
+      },
+      {
+        label: "Close is fine",
+        value: "some",
+        weights: { rn: 0, native: 0 },
+      },
+      {
+        label: "Cross-platform consistent UX",
+        value: "no",
+        weights: { rn: 2, native: 0 },
+      },
+    ],
+  },
+  // Dependencies
+  {
+    id: "third_party_sdks",
+    category: "Dependencies",
+    text: "Do you rely on third‑party SDKs that are only available or significantly better on native platforms?",
+    options: [
+      {
+        label: "Yes — native-only",
+        value: "yes",
+        weights: { rn: 0, native: 3 },
+      },
+      {
+        label: "Some SDKs may be native",
         value: "maybe",
         weights: { rn: 0, native: 1.5 },
       },
-      { label: "No", value: "no", weights: { rn: 3, native: 0 } },
-    ],
-  },
-  {
-    id: "team_web_ts",
-    category: "Team & Skills",
-    text: "Do you already have web or TypeScript developers?",
-    options: [
-      { label: "Yes", value: "yes", weights: { rn: 3, native: 0 } },
-      { label: "Somewhat", value: "some", weights: { rn: 1.5, native: 0 } },
-      { label: "No", value: "no", weights: { rn: 0, native: 1 } },
-    ],
-  },
-  {
-    id: "team_native",
-    category: "Team & Skills",
-    text: "Do you already have strong native iOS/Android developers?",
-    options: [
-      { label: "Yes", value: "yes", weights: { rn: 0, native: 3 } },
-      { label: "Somewhat", value: "some", weights: { rn: 0.0, native: 1.5 } },
-      { label: "No", value: "no", weights: { rn: 1, native: 0 } },
-    ],
-  },
-  {
-    id: "budget",
-    category: "Resourcing",
-    text: "Are budget and hiring costs constrained (vs. funding two separate native teams)?",
-    options: [
       {
-        label: "Yes, constrained",
-        value: "yes",
+        label: "No — JS/TS/bridges available",
+        value: "no",
         weights: { rn: 2, native: 0 },
       },
-      { label: "Somewhat", value: "some", weights: { rn: 1, native: 0.5 } },
-      { label: "No", value: "no", weights: { rn: 0, native: 1.5 } },
     ],
   },
+
+  // Team & Skills
   {
-    id: "sdk_availability",
-    category: "Dependencies",
-    text: "Do you depend on third-party SDKs that are only available natively?",
+    id: "team_skills",
+    category: "Team & Skills",
+    text: "Does your team primarily consist of web/TypeScript developers who can reuse skills and code?",
     options: [
-      { label: "Yes", value: "yes", weights: { rn: 0, native: 3 } },
-      { label: "Maybe", value: "maybe", weights: { rn: 0, native: 1.5 } },
-      { label: "No", value: "no", weights: { rn: 1, native: 0 } },
+      {
+        label: "Yes — mostly web/TS",
+        value: "yes",
+        weights: { rn: 3, native: 0 },
+      },
+      { label: "Mixed skills", value: "some", weights: { rn: 1.5, native: 0 } },
+      {
+        label: "Mostly native engineers",
+        value: "no",
+        weights: { rn: 0, native: 2 },
+      },
+    ],
+  },
+
+  {
+    id: "code_reuse",
+    category: "Team & Skills",
+    text: "Do you want to share code, components, or business logic with a web app or reduce duplication between platforms?",
+    options: [
+      {
+        label: "Yes — high reuse",
+        value: "yes",
+        weights: { rn: 3, native: 0 },
+      },
+      {
+        label: "Some reuse possible",
+        value: "some",
+        weights: { rn: 1.5, native: 0 },
+      },
+      {
+        label: "No — platform-specific apps",
+        value: "no",
+        weights: { rn: 0, native: 1.5 },
+      },
+    ],
+  },
+
+  // Resourcing
+  {
+    id: "time_to_market",
+    category: "Resourcing",
+    text: "Is a fast launch across both stores a major priority (minimize duplicated work / parallel releases)?",
+    options: [
+      {
+        label: "Yes — speed matters most",
+        value: "yes",
+        weights: { rn: 3, native: 0 },
+      },
+      {
+        label: "Somewhat — balanced",
+        value: "some",
+        weights: { rn: 1.5, native: 0 },
+      },
+      {
+        label: "No — long-term roadmap",
+        value: "no",
+        weights: { rn: 0, native: 1.5 },
+      },
+    ],
+  },
+
+  {
+    id: "budget_constraints",
+    category: "Resourcing",
+    text: "Are budget and hiring constraints important (would managing two full native teams be costly)?",
+    options: [
+      { label: "Tight budget", value: "yes", weights: { rn: 3, native: 0 } },
+      { label: "Moderate", value: "some", weights: { rn: 0, native: 0 } },
+      {
+        label: "Budget is flexible",
+        value: "no",
+        weights: { rn: 0, native: 3 },
+      },
+    ],
+  },
+
+  // Maintenance (short-term)
+  {
+    id: "maintenance_shortterm",
+    category: "Maintenance",
+    text: "Are you prioritizing faster delivery and minimizing short‑term maintenance (one shared codebase for quick releases)?",
+    options: [
+      {
+        label: "Yes — prioritize speed / single codebase",
+        value: "yes",
+        weights: { rn: 3, native: 0 },
+      },
+      {
+        label: "Somewhat — balance speed and effort",
+        value: "some",
+        weights: { rn: 1.5, native: 0 },
+      },
+      {
+        label: "No — platform specialists preferred",
+        value: "no",
+        weights: { rn: 0, native: 2 },
+      },
+    ],
+  },
+
+  // Maintenance (long-term)
+  {
+    id: "maintenance_longterm",
+    category: "Maintenance",
+    text: "How concerned are you about long‑term platform divergence and the cumulative cost of maintaining native integrations and OS updates?",
+    options: [
+      {
+        label: "High concern — avoid platform divergence",
+        value: "high",
+        weights: { rn: 0, native: 3 },
+      },
+      {
+        label: "Moderate concern",
+        value: "moderate",
+        weights: { rn: 0, native: 1.5 },
+      },
+      {
+        label: "Low concern — single codebase acceptable",
+        value: "low",
+        weights: { rn: 2, native: 0 },
+      },
+    ],
+  },
+
+  // Quality & Stability
+  {
+    id: "security_stability",
+    category: "Quality & Stability",
+    text: "Does the project require platform-level security guarantees, regulatory compliance, or OS-specific stability (secure enclave, critical background services)?",
+    options: [
+      {
+        label: "Yes — platform guarantees & compliance required",
+        value: "yes",
+        weights: { rn: 0, native: 3 },
+      },
+      {
+        label: "Important but manageable",
+        value: "some",
+        weights: { rn: 0, native: 1.5 },
+      },
+      {
+        label: "Not a primary concern",
+        value: "no",
+        weights: { rn: 1.5, native: 0 },
+      },
     ],
   },
 ];
@@ -182,12 +349,16 @@ export default function App() {
       <header className="sticky top-0 z-10 backdrop-blur bg-white/80 border-b border-neutral-200">
         <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-2xl bg-black text-white grid place-items-center font-semibold">
-              RN
+            <div className="w-8 h-8 flex items-center justify-center">
+              <img
+                src={logoImg}
+                alt="Elements NL Logo"
+                className="w-8 h-8 rounded-lg"
+              />
             </div>
             <div>
               <h1 className="text-lg font-semibold tracking-tight">
-                RN vs Native · Project Fit
+                React-Native vs Native · Project Fit
               </h1>
               <p className="text-xs text-neutral-500">
                 Answer a few questions → get a weighted recommendation.
@@ -208,61 +379,88 @@ export default function App() {
       <main className="max-w-5xl mx-auto px-4 py-6">
         {/* (Recommendation moved to bottom) */}
 
-        {/* Questions */}
-        <section className="space-y-4">
-          {QUESTIONS.map((q, idx) => (
-            <div
-              key={q.id}
-              className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="text-[11px] uppercase tracking-wider text-neutral-500 font-medium mb-1">
-                    {q.category ?? "Question"}
+        {/* Questions grouped by category */}
+        <section className="space-y-6">
+          {(() => {
+            // Build a map of category -> questions
+            const groups: Record<string, Question[]> = {};
+            QUESTIONS.forEach((q) => {
+              const cat = q.category ?? "Other";
+              if (!groups[cat]) groups[cat] = [];
+              groups[cat].push(q);
+            });
+
+            // Keep a running question index for global numbering
+            let globalIndex = 0;
+            return Object.entries(groups).map(([cat, qs]) => (
+              <div key={cat}>
+                <div className="mb-2">
+                  <div className="text-sm font-semibold text-neutral-700">
+                    {cat}
                   </div>
-                  <h3 className="text-base font-medium leading-6">
-                    {idx + 1}. {q.text}
-                  </h3>
-                  {q.help && (
-                    <p className="mt-1 text-sm text-neutral-600">{q.help}</p>
-                  )}
+                </div>
+
+                <div className="space-y-4">
+                  {qs.map((q) => {
+                    const idx = globalIndex++;
+                    return (
+                      <div
+                        key={q.id}
+                        className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <h3 className="text-base font-medium leading-6">
+                              {idx + 1}. {q.text}
+                            </h3>
+                            {q.help && (
+                              <p className="mt-1 text-sm text-neutral-600">
+                                {q.help}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                          {q.options.map((opt) => {
+                            const id = `${q.id}_${opt.value}`;
+                            const selected = answers[q.id] === opt.value;
+                            return (
+                              <label
+                                key={opt.value}
+                                htmlFor={id}
+                                className={
+                                  "cursor-pointer rounded-xl border p-3 text-sm transition-colors " +
+                                  (selected
+                                    ? "border-neutral-900 bg-neutral-50"
+                                    : "border-neutral-200 hover:border-neutral-300")
+                                }
+                              >
+                                <input
+                                  id={id}
+                                  type="radio"
+                                  name={q.id}
+                                  value={opt.value}
+                                  checked={selected}
+                                  onChange={() => setAnswer(q.id, opt.value)}
+                                  className="sr-only"
+                                />
+                                <div className="font-medium">{opt.label}</div>
+                                <div className="mt-1 text-neutral-500 text-xs">
+                                  RN {opt.weights.rn} · Native{" "}
+                                  {opt.weights.native}
+                                </div>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-
-              <div className="mt-4 grid gap-2 sm:grid-cols-3">
-                {q.options.map((opt) => {
-                  const id = `${q.id}_${opt.value}`;
-                  const selected = answers[q.id] === opt.value;
-                  return (
-                    <label
-                      key={opt.value}
-                      htmlFor={id}
-                      className={
-                        "cursor-pointer rounded-xl border p-3 text-sm transition-colors " +
-                        (selected
-                          ? "border-neutral-900 bg-neutral-50"
-                          : "border-neutral-200 hover:border-neutral-300")
-                      }
-                    >
-                      <input
-                        id={id}
-                        type="radio"
-                        name={q.id}
-                        value={opt.value}
-                        checked={selected}
-                        onChange={() => setAnswer(q.id, opt.value)}
-                        className="sr-only"
-                      />
-                      <div className="font-medium">{opt.label}</div>
-                      <div className="mt-1 text-neutral-500 text-xs">
-                        RN {opt.weights.rn} · Native {opt.weights.native}
-                      </div>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+            ));
+          })()}
         </section>
 
         {/* Footer actions */}
@@ -276,9 +474,7 @@ export default function App() {
                 <div className="text-xs text-neutral-500 flex-1">
                   {answered}/{total} answered
                   {!submitted && !allAnswered && (
-                    <>
-                      {" · "}Answer remaining questions to enable submit.
-                    </>
+                    <>{" · "}Answer remaining questions to enable submit.</>
                   )}
                   {!submitted && allAnswered && (
                     <>
@@ -289,7 +485,9 @@ export default function App() {
                   {submitted && (
                     <>
                       {" · "}
-                      <span className="text-neutral-600">You can still adjust answers.</span>
+                      <span className="text-neutral-600">
+                        You can still adjust answers.
+                      </span>
                     </>
                   )}
                 </div>
@@ -322,62 +520,129 @@ export default function App() {
         {/* Result Card (moved to bottom) */}
         {submitted && (
           <section id="result-card" className="mb-6 mt-4">
-            <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="rounded-2xl border border-neutral-200 bg-gradient-to-br from-white to-neutral-50 p-6 shadow-lg">
+              {/* Header with recommendation */}
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
                 <div>
-                  <h2 className="text-base font-semibold">Current recommendation</h2>
-                  <p className="text-sm text-neutral-600">
-                    {recommended === "Tie"
-                      ? "It’s a tie."
-                      : `${recommended} looks like a better fit.`}
-                  </p>
+                  <h2 className="text-xl font-bold text-neutral-800 mb-2">
+                    🎯 Recommendation
+                  </h2>
                 </div>
-                <div className="text-sm text-neutral-600">
-                  RN score: <span className="font-medium">{totals.rn.toFixed(1)}</span> ·
-                  Native score: <span className="font-medium">{totals.native.toFixed(1)}</span>
+                <div className="flex flex-col items-end gap-2">
+                  <div className="text-right">
+                    <div className="text-sm text-neutral-500">
+                      Confidence Score
+                    </div>
+                    <div className="text-2xl font-bold text-neutral-800">
+                      {Math.max(rnPct, nativePct)}%
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="mt-4">
-                <div className="relative h-5 w-full rounded-full bg-neutral-200 overflow-hidden ring-1 ring-neutral-300/60">
-                  {/* RN segment */}
+
+              {/* Enhanced Progress Bar */}
+              <div className="space-y-4">
+                <div className="relative h-8 w-full rounded-2xl bg-neutral-200 overflow-hidden shadow-inner">
+                  {/* React Native segment */}
                   <div
-                    className="h-full bg-indigo-600 transition-all duration-500 ease-out"
+                    className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all duration-700 ease-out relative"
                     style={{ width: rnPct + "%" }}
                     title={`React Native ${rnPct}%`}
-                    aria-label={`React Native ${rnPct}%`}
-                  />
-                  {/* Native segment (flex grow placeholder) */}
+                  >
+                    {rnPct > 15 && (
+                      <div className="absolute inset-0 flex items-center justify-start pl-3">
+                        <img
+                          src={rnImg}
+                          alt="React Native"
+                          className="w-4 h-4 mr-2"
+                        />
+                        <span className="text-xs font-bold text-white drop-shadow">
+                          {rnPct}%
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Native segment */}
                   <div
-                    className="absolute top-0 right-0 h-full bg-emerald-600 transition-all duration-500 ease-out"
+                    className="absolute top-0 right-0 h-full bg-gradient-to-l from-green-500 to-emerald-600 transition-all duration-700 ease-out"
                     style={{ width: nativePct + "%" }}
                     title={`Native ${nativePct}%`}
-                    aria-label={`Native ${nativePct}%`}
-                  />
-                  {/* Boundary divider */}
+                  >
+                    {nativePct > 15 && (
+                      <div className="absolute inset-0 flex items-center justify-end pr-3">
+                        <span className="text-xs font-bold text-white drop-shadow mr-2">
+                          {nativePct}%
+                        </span>
+                        <img src={nativeImg} alt="Native" className="w-4 h-4" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Center divider */}
                   <div
-                    className="absolute top-0 bottom-0 w-px bg-white/70 mix-blend-overlay pointer-events-none"
+                    className="absolute top-0 bottom-0 w-0.5 bg-white/80 shadow-sm"
                     style={{ left: rnPct + "%" }}
                   />
-                  {/* Inline labels (only show if enough space) */}
-                  {rnPct > 12 && (
-                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-medium text-white drop-shadow-sm tracking-wide">
-                      {rnPct}% RN
-                    </span>
-                  )}
-                  {nativePct > 12 && (
-                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-medium text-white drop-shadow-sm tracking-wide">
-                      {nativePct}% Native
-                    </span>
-                  )}
                 </div>
-                <div className="mt-2 flex items-center justify-between text-[11px] text-neutral-600 font-medium">
-                  <div className="flex items-center gap-1.5">
-                    <span className="inline-block w-3 h-3 rounded-sm bg-indigo-600 shadow-sm" />
-                    <span>React Native: <span className="font-semibold">{rnPct}%</span></span>
+
+                {/* Score breakdown */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
+                    <img
+                      src={rnImg}
+                      alt="React Native"
+                      className="w-6 h-6 rounded-lg shadow-sm"
+                    />
+                    <div>
+                      <div className="text-sm font-semibold text-blue-800">
+                        React Native
+                      </div>
+                      <div className="text-lg font-bold text-blue-900">
+                        {rnPct}%
+                      </div>
+                      <div className="text-xs text-blue-600">
+                        Score: {totals.rn.toFixed(1)}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="inline-block w-3 h-3 rounded-sm bg-emerald-600 shadow-sm" />
-                    <span>Native: <span className="font-semibold">{nativePct}%</span></span>
+
+                  <div className="flex items-center gap-3 p-3 bg-green-50 rounded-xl border border-green-100">
+                    <img
+                      src={nativeImg}
+                      alt="Native"
+                      className="w-6 h-6 rounded-lg shadow-sm"
+                    />
+                    <div>
+                      <div className="text-sm font-semibold text-green-800">
+                        Native Development
+                      </div>
+                      <div className="text-lg font-bold text-green-900">
+                        {nativePct}%
+                      </div>
+                      <div className="text-xs text-green-600">
+                        Score: {totals.native.toFixed(1)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Additional insights */}
+                <div className="mt-4 p-4 bg-neutral-100 rounded-xl">
+                  <div className="flex items-start gap-2">
+                    <div className="text-lg">💡</div>
+                    <div>
+                      <div className="text-sm font-medium text-neutral-700 mb-1">
+                        Key Insight
+                      </div>
+                      <div className="text-sm text-neutral-600">
+                        {Math.abs(rnPct - nativePct) < 10
+                          ? "The scores are very close! Both options are viable - consider team expertise and project timeline."
+                          : Math.max(rnPct, nativePct) >= 70
+                          ? "Strong preference detected. The winning option aligns well with your requirements."
+                          : "Moderate preference. Review the individual question responses to understand the key factors."}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -401,18 +666,10 @@ export default function App() {
                 You can tweak questions, options, and weights in the{" "}
                 <code>QUESTIONS</code> constant.
               </li>
-              <li>
-                Use the share button to copy a URL with your current selections
-                for quick reviews with stakeholders.
-              </li>
             </ul>
           </div>
         </section>
       </main>
-
-      <footer className="py-8 text-center text-xs text-neutral-500">
-        Built with ❤️ — Customize to match your product context.
-      </footer>
     </div>
   );
 }
