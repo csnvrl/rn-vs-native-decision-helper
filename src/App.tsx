@@ -446,10 +446,6 @@ export default function App() {
                                   className="sr-only"
                                 />
                                 <div className="font-medium">{opt.label}</div>
-                                <div className="mt-1 text-neutral-500 text-xs">
-                                  RN {opt.weights.rn} · Native{" "}
-                                  {opt.weights.native}
-                                </div>
                               </label>
                             );
                           })}
@@ -601,9 +597,6 @@ export default function App() {
                       <div className="text-lg font-bold text-blue-900">
                         {rnPct}%
                       </div>
-                      <div className="text-xs text-blue-600">
-                        Score: {totals.rn.toFixed(1)}
-                      </div>
                     </div>
                   </div>
 
@@ -620,9 +613,6 @@ export default function App() {
                       <div className="text-lg font-bold text-green-900">
                         {nativePct}%
                       </div>
-                      <div className="text-xs text-green-600">
-                        Score: {totals.native.toFixed(1)}
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -636,11 +626,27 @@ export default function App() {
                         Key Insight
                       </div>
                       <div className="text-sm text-neutral-600">
-                        {Math.abs(rnPct - nativePct) < 10
-                          ? "The scores are very close! Both options are viable - consider team expertise and project timeline."
-                          : Math.max(rnPct, nativePct) >= 70
-                          ? "Strong preference detected. The winning option aligns well with your requirements."
-                          : "Moderate preference. Review the individual question responses to understand the key factors."}
+                        Scores below 30% or above 70% typically point to a safe
+                        choice. However, results in the 30%–70% range represent
+                        a grey area where context, priorities, and long-term
+                        strategy truly matter. To navigate these nuances and
+                        make the best decision for your organization, reach out
+                        for tailored advice:{" "}
+                        <a
+                          href="https://www.elements.nl"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 underline"
+                        >
+                          www.elements.nl
+                        </a>{" "}
+                        or{" "}
+                        <a
+                          href="mailto:expert@elements.nl"
+                          className="text-blue-600 underline"
+                        >
+                          expert@elements.nl
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -649,26 +655,6 @@ export default function App() {
             </div>
           </section>
         )}
-        {/* Explanation now follows the recommendation for end-of-page context */}
-        <section className="mb-16">
-          <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-            <h4 className="text-sm font-semibold">How this works</h4>
-            <ul className="mt-2 text-sm list-disc pl-5 text-neutral-700 space-y-1">
-              <li>
-                Each answer adds a <span className="font-medium">weight</span>{" "}
-                to either React Native or Native.
-              </li>
-              <li>
-                We convert totals into percentages and visualize them in the bar
-                above.
-              </li>
-              <li>
-                You can tweak questions, options, and weights in the{" "}
-                <code>QUESTIONS</code> constant.
-              </li>
-            </ul>
-          </div>
-        </section>
       </main>
     </div>
   );
